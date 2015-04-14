@@ -1,0 +1,60 @@
+<!doctype html public "(づ｡◕o◕｡)づ">
+
+<meta charset=utf-8>
+<title>kick-the-clog</title>
+
+<script src=p5.min.js></script>
+<script src=https://cdn.firebase.com/js/client/2.2.1/firebase.js></script>
+
+<body>
+<script>
+var people = {}
+var fb = new Firebase("https://intense-inferno-7456.firebaseio.com")
+
+function generateUUID(){
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random()*16)%16 | 0;
+    d = Math.floor(d/16);
+    return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+  });
+ return uuid;
+};
+
+var me = { x: 50, y: 50, c: 127, id: generateUUID() }
+
+function setup(){
+  createCanvas(600,400)
+  me.c = color(random(255),random(255),random(255))
+  people[me.id] = me
+  fb.set(people)
+  fb.on('child_added', function(snapshot) {
+    var person = snapshot.val()
+    people[person.id] = person
+  });
+  fb.on('child_changed', function(snapshot) {
+    var person = snapshot.val()
+    people[person.id] = person
+  });
+
+}
+
+function draw(){
+  if (keyIsDown(LEFT_ARROW)) {
+    people[me.id].x -= 5
+    fb.set(people)
+  }
+  if (keyIsDown(RIGHT_ARROW)) {
+    people[me.id].x += 5
+    fb.set(people)
+  }
+  clear()
+  for(var id in people){
+    var person = people[id]
+    fill(color(person.c.rgba))
+    ellipse(person.x,person.y,50,50)
+  }
+}
+</script>
+
+</body>
